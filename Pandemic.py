@@ -3,9 +3,19 @@ import random
 import time
 #nick says use pygame
 
-def pregrame_dealing():
+def pregame_dealing():
     global players #dict of playernames, roles, cards
     global cdeck
+    global cdeck_discard
+    random.shuffle(cdeck)
+    for player in players:
+        card1 = cdeck.pop()
+        card2 = cdeck.pop()
+        players[player]["cards"] = [card1,card2]
+        cdeck_discard.append(card1)
+        cdeck_discard.append(card2)
+        print(players[player]["cards"])
+    print("The remaining cards in cdeck after dealing is",len(cdeck))
     
     
     
@@ -13,16 +23,32 @@ def pregame_city_deck_prep(piles):
     print("Preparing the city deck...")
     global cdeck
     random.shuffle(cdeck)
-    cards = len(cdeck)
-    sub1 = cdeck[:9]
-    sub2 = cdeck[9:18]
-    sub3 = cdeck[18:27]
-    sub4 = cdeck[27:36]
-    sub5 = cdeck[36:45]
-    sub6 = cdeck[45:]
-    subdecks = [sub1,sub2,sub3,sub4,sub5,sub6]
+    sublist_lengths = []
+    if len(players)==4 or len(players)==2:
+        if piles==4:
+            sublist_lengths = [11,11,11,12]
+        elif piles==5:
+            sublist_lengths = [9,9,9,9,9]            
+        else:
+            sublist_lengths = [8,8,8,7,7,7]
+    else: #there must be 3 players
+        if piles==4:
+            sublist_lengths = [10,10,11,11]            
+        elif piles==5:
+            sublist_lengths = [8,8,8,9,9]
+        else:
+            sublist_lengths = [7,7,7,7,7,7]
+    subdecks = []
+    i=0
+    start=0
+    while i<piles:
+        subdeck = cdeck[start:start+sublist_lengths[i]]
+        subdecks.append(subdeck)
+        start = start + len(subdeck)
+        i+=1
+    print()
     index = 0
-    while index<6:
+    while index<piles:
         subdecks[index].append("Epidemic")
         random.shuffle(subdecks[index])
         index+=1
@@ -214,29 +240,14 @@ events = ["Resilient Population",
           "Airlift",
           "Governmany Grant",
           "Forecast"]
-
-#assume hard mode
-#piles = 6
-
-diff = input("What difficulty would you like to play at?(Easy, Medium, Hard)")
-if diff.lower()=="easy":
-    epidemics = ["Epidemic!"]*4
-    piles = 4
-elif diff.lower()=="medium":
-    epidemics = ["Epidemic!"]*5
-    piles=5
-elif diff.lower()=="hard":
-    epidemics = ["Epidemic!"]*6
-    piles=6
-else:
-    print("That is not an option! You lose!")
-    time.sleep(3)
-    exit()
-
 cdeck = list(nodes)+events
 ideck = list(nodes)
 ideck_discard = []
-cures = {"blue":False, "black":False, "yellow":False, "red":False}
+cdeck_discard = []
+epidemic_counter = 0
+infect_card_counter = 0
+diseases = {"blue":{"cured":False,"eradicated":False,"cubes":24}, "black":{"cured":False,"eradicated":False,"cubes":24},
+         "yellow":{"cured":False,"eradicated":False,"cubes":24}, "red":{"cured":False,"eradicated":False,"cubes":24}}
 cities = {
     "Atlanta":{"color":"blue","cubes":0,"research_station":True, "quarantined": False, "population":100},
     "Chicago":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
@@ -289,6 +300,26 @@ cities = {
  }
 roles = ["Dispatcher","Researcher","Medic","Scientist","Quarantine Specialist","Operations Expert","Contingency Planner"]
 players={}
+
+
+
+
+diff = input("What difficulty would you like to play at?(Easy, Medium, Hard)")
+if diff.lower()=="easy":
+    epidemics = ["Epidemic!"]*4
+    piles = 4
+elif diff.lower()=="medium":
+    epidemics = ["Epidemic!"]*5
+    piles=5
+elif diff.lower()=="hard":
+    epidemics = ["Epidemic!"]*6
+    piles=6
+else:
+    print("That is not an option! You lose!")
+    time.sleep(3)
+    exit()
+
+
 while True:
     try:
         temp = int(input("How many players are playing?(2-4)"))
@@ -323,7 +354,12 @@ for subdeck in cdeck: #flatten the list of lists
 #the city deck is complete and players have cards. It is now time for infection deck and infecting
 pregame_infect_deck_prep()
 
-
+print("You are ready to play!")
+#main game loop - create a menu of actions and take input for that.
+#               - create methods for each of those actions
+#               - dtermine the order before all of this happens
+while epidemic_counter<8 and len(cdeck)>0: #check for cubes during infection steps
+    pass    
 
 
 
