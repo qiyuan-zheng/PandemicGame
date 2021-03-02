@@ -1,5 +1,60 @@
 import networkx as nx
+import random
+import time
+#nick says use pygame
 
+def pregrame_dealing():
+    global players #dict of playernames, roles, cards
+    global cdeck
+    
+    
+    
+def pregame_city_deck_prep(piles):
+    print("Preparing the city deck...")
+    global cdeck
+    random.shuffle(cdeck)
+    cards = len(cdeck)
+    sub1 = cdeck[:9]
+    sub2 = cdeck[9:18]
+    sub3 = cdeck[18:27]
+    sub4 = cdeck[27:36]
+    sub5 = cdeck[36:45]
+    sub6 = cdeck[45:]
+    subdecks = [sub1,sub2,sub3,sub4,sub5,sub6]
+    index = 0
+    while index<6:
+        subdecks[index].append("Epidemic")
+        random.shuffle(subdecks[index])
+        index+=1
+    cdeck = []
+    while subdecks!=[]:
+        subdeck = random.choice(subdecks)
+        cdeck.append(subdeck)
+        subdecks.remove(subdeck)
+    print("The city deck is prepared!")
+
+def pregame_infect_deck_prep():
+    print("Preparing the infection deck...")
+    global ideck
+    global ideck_discard
+    global cities
+    random.shuffle(ideck)
+    print("The infection deck has been prepared!")
+    print()
+    print("The infecting has begun!")
+    i=3
+    j=0
+    while i>0:
+        while j<3:
+            city = random.choice(ideck)
+            print(city,"has been infected with",i,cities[city]["color"],"cubes!")
+            cities[city]["cubes"] = i
+            ideck.remove(city)
+            ideck_discard.append(city)
+            j+=1
+        j=0
+        i-=1
+    
 network=nx.Graph()
 
 network.add_node("Atlanta")
@@ -53,8 +108,6 @@ network.add_node("Tokyo")
 network.add_node("Taipei")
 network.add_node("Seoul")
 network.add_node("Osaka")
-
-print("Number of Cities: ",str(len(network.nodes())))
 
 #blue edges
 network.add_edge("Atlanta","Chicago")
@@ -155,173 +208,122 @@ network.add_edge("Tokyo","Osaka")
 network.add_edge("Tokyo","Seoul")
 network.add_edge("Seoul","Beijing")
 
-print("Number of Connections: ",str(len(network.edges())))
+nodes = network.nodes
+events = ["Resilient Population",
+          "One Quiet Night",
+          "Airlift",
+          "Governmany Grant",
+          "Forecast"]
+
+#assume hard mode
+#piles = 6
+
+diff = input("What difficulty would you like to play at?(Easy, Medium, Hard)")
+if diff.lower()=="easy":
+    epidemics = ["Epidemic!"]*4
+    piles = 4
+elif diff.lower()=="medium":
+    epidemics = ["Epidemic!"]*5
+    piles=5
+elif diff.lower()=="hard":
+    epidemics = ["Epidemic!"]*6
+    piles=6
+else:
+    print("That is not an option! You lose!")
+    time.sleep(3)
+    exit()
+
+cdeck = list(nodes)+events
+ideck = list(nodes)
+ideck_discard = []
+cures = {"blue":False, "black":False, "yellow":False, "red":False}
+cities = {
+    "Atlanta":{"color":"blue","cubes":0,"research_station":True, "quarantined": False, "population":100},
+    "Chicago":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "San Francisco":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Montreal":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "New York":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Washington":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Madrid":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "London":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Essen":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Paris":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "St. Petersburg":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Milan":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Los Angeles":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Mexico City":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Miami":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Bogota":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Lima":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Santiago":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Buenos Aires":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Sao Paolo":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Lagos":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Kinshasa":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Khartoum":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Johannesburg":{"color":"yellow","cubes":0,"research_station":False, "quarantined":False, "population":100},
+    "Cairo":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Algiers":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Istanbul":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Moscow":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Tehran":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Baghdad":{"color":"black","cubes":0,"research_station":False, "quarantined":False, "population":100},
+    "Riyadh":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Delhi":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Karachi":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Mumbai":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Chennai":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Kolkatta":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Sydney":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Jakarta":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Manilla":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Ho Chi Minh City":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Hong Kong":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Bangkok":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Osaka":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Shanghai":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Beijing":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Tokyo":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Taipei":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Seoul":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+ }
+roles = ["Dispatcher","Researcher","Medic","Scientist","Quarantine Specialist","Operations Expert","Contingency Planner"]
+players={}
+while True:
+    try:
+        temp = int(input("How many players are playing?(2-4)"))
+        break
+    except:
+        print("Please try again.")
+i=0
+while i < temp:
+    role = random.choice(roles)
+    roles.remove(role)
+    if i==0:
+        name = input("What is the first player's name?")
+    else:
+        name = input("What is the next player's name?")
+    players[name] = {"role": role}
+    print(name,"is the",role+"!")
+    i+=1
+print()
+
+#the dealing to the players has to go here before the decks are determined
+#this will then determine the order, which is based on card population
+#this means you need to edit the cities dict to add population
+pregame_dealing()
+
+#once players have initial cards, epidemic cards need to be inserted to the city deck
+pregame_city_deck_prep(piles)
+city_deck = []
+for subdeck in cdeck: #flatten the list of lists
+    for city in subdeck:
+        city_deck.append(city)
+
+#the city deck is complete and players have cards. It is now time for infection deck and infecting
+pregame_infect_deck_prep()
 
 
-###Compute centralities###
-
-def compute_dc(G):
-    """
-    G: Graph
-    return: dict, a map between each node to its degree centrality
-    """
-    acc={}
-    for node in G.nodes:
-        acc[node] = len([n for n in G.neighbors(node)])
-    return acc
-
-
-def compute_ec(G):
-    """
-    G: Graph
-    return: dict, a map between each node to its eigenvector centrality
-    values are rounded to 5 digits after the decimal point
-    """
-
-    n = len(G.nodes())
-
-    # initial guess
-    ec = {node: 1 for node in G.nodes() }
-
-    # this is the maximum number of iterations we want to run
-    # hopefully things will converge much faster
-    for i in range(100):
-
-        # new guess
-        new_ec = ec.copy()
-
-        # update
-        for node in G.nodes():
-            for nei in G.neighbors(node):
-                new_ec[node] += ec[nei]
-
-        # normalize
-        sum_ecs = sum(new_ec.values())
-        new_ec = {node: n*(new_ec[node] / sum_ecs) for node in G.nodes() }
-
-        # calculate difference from previous solution
-        diff = 0
-        for node in G.nodes():
-            diff += abs(ec[node] - new_ec[node])
-        diff /= n
-
-        # we have converged!
-        if diff < 0.0001:
-            break
-
-        ec = new_ec.copy()
-
-    
-    return { node: round(new_ec[node],5) for node in G.nodes() }
-
-
-
-
-def compute_bc(G):
-    """
-    G: Graph
-    return: dict, a map between each node to its betweenness centrality
-    """
-    nodes=list(G.nodes())
-    n=len(nodes)
-    bc={node:0 for node in nodes}
-    for source in range(n):
-        sigma=[0 for t in range(n)]
-        D=[-1 for i in range(n)]
-        delta=[0 for t in range(n)]
-        P=[[] for i in range(n)]
-        S=[]
-        Q=[source]
-        D[source]=0
-        sigma[source]=1
-        while len(Q)>0:
-            v=Q.pop(0)
-            S+=[v]
-            neis=list(G.neighbors(nodes[v]))
-            for w in neis:
-                if D[nodes.index(w)]==-1:
-                    D[nodes.index(w)]=D[v]+1
-                    Q+=[nodes.index(w)]
-                if D[nodes.index(w)]==D[v]+1:
-                    P[nodes.index(w)]+=[v]
-                    sigma[nodes.index(w)]+=sigma[v]
-        while len(S)>0:
-            w=S.pop()
-            for v in P[w]:
-                delta[v]+= (sigma[v]/sigma[w])*(1+delta[w])
-            if w!=source:
-                bc[w]=bc[w]+delta[nodes.index(w)]
-        
-    return bc
-
-print("The betweenness centrality for each city in the network: ",
-      str(compute_bc(network)))
-
-def BFS(G, source):
-
-    n = len(G.nodes())
-    
-    visited = [ False for i in range(n) ]
-    distances = [ -1 for i in range(n) ]
-    
-    visited[source] = True
-    distances[source] = 0
-
-    next_nodes = [ (source,0) ]
-
-    while len(next_nodes) > 0:
-
-        curr_node, curr_dist = next_nodes.pop(0)
-
-        for nei in G.neighbors(curr_node):
-            if not visited[nei]:
-                visited[nei] = True
-                distances[nei] = curr_dist + 1
-                next_nodes+=[(nei,curr_dist+1)]
-    return distances
-
-def invert(l):
-    acc=[]
-    for item in l:
-        if item==0:
-            pass
-        else:
-            acc=acc+ [1/item]
-    return acc
-        
-def compute_hc(G):
-    """
-    G: Graph
-    return: dict, a map between each node to its harmonic centrality
-    values are rounded to 5 digits after the decimal point
-    """
-    hcs={node:0 for node in G.nodes()}
-    for node in G.nodes():
-        dists=BFS(G,node)
-        dists=invert(dists)
-        hcs[node]=round((1/(len(G.nodes())-1))*sum(dists),5)
-    return hcs
-
-dc_list=[]
-degs=compute_dc(network)
-k=sorted(degs,key=degs.get,reverse=True)
-for city in k:
-    dc_list+=[(city,degs[city])]
-print(dc_list)
-
-
-
-ec_list=[]
-x=compute_ec(network)
-j=sorted(x, key=x.get,reverse=True)
-
-for city in j:
-    ec_list+=[(city, x[city])]
-print(ec_list)
-
-import random
-
-pull_deck=k+6*["Epidemic Card"]+5*["Event Card"]
 
 
 
