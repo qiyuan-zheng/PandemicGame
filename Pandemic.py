@@ -14,9 +14,7 @@ def pregame_dealing():
         players[player]["cards"] = [card1,card2]
         cdeck_discard.append(card1)
         cdeck_discard.append(card2)
-        print(players[player]["cards"])
-    print("The remaining cards in cdeck after dealing is",len(cdeck))
-    
+        print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])    
     
     
 def pregame_city_deck_prep(piles):
@@ -62,7 +60,7 @@ def pregame_city_deck_prep(piles):
 def pregame_infect_deck_prep():
     print("Preparing the infection deck...")
     global ideck
-    global ideck_discard
+    global infect_deck_discard
     global cities
     random.shuffle(ideck)
     print("The infection deck has been prepared!")
@@ -76,10 +74,169 @@ def pregame_infect_deck_prep():
             print(city,"has been infected with",i,cities[city]["color"],"cubes!")
             cities[city]["cubes"] = i
             ideck.remove(city)
-            ideck_discard.append(city)
+            infect_deck_discard.append(city)
             j+=1
         j=0
         i-=1
+
+def turn_checker():
+    global turn
+    global players
+    print("It is",players[turn]["name"]+str("'s"),"turn as the",players[turn]["role"]+str("!"))
+    if turn==len(players):
+        turn = 1 #start the rotation over
+    else:
+        turn+=1 #else next person
+
+def menu():
+    print("Enter the number of your first action or 'd' to display the board:")
+    print("1 Walk")
+    print("2 Fly")
+    print("3 Exchange Information (Trade Cards)")
+    print("4 Pickup Cube(s)")
+    print("5 Cure a Disease")
+    print("6 Build a Research Station")
+    print("d Display Board")
+    x=input()
+    return x
+
+def is_valid_action(action):
+    try:
+        action = int(action)
+        if action>=1 and action<=6:
+            return True
+        else:
+            return False
+    except:
+        return action=="d"
+
+def resolve_action(action):
+    try:
+        action = int(action)
+        if action==1:
+            return walk()
+        elif action==2:
+            return fly()
+        elif action==3:
+            return exchange_info()
+        elif action==4:
+            return pickup()
+        elif action==5:
+            return cure()
+        elif action==6:
+            return research()
+    except:
+        return display_board()
+
+def walk():
+    print("I am walking!")
+    return True
+
+def fly():
+    print("I am flying!")
+    return True
+
+def exchange_info():
+    print("I am exchanging info!")
+    return True
+
+def pickup():
+    print("I am picking up cubes!")
+    return True
+
+def cure():
+    print("I am curing!")
+    return True
+
+def research():
+    print("I am building a research station!")
+    return True
+
+def display_board():
+    print("The board is being displayed! jk")
+    return False
+
+def draw_two():
+    global city_deck
+    global players
+    global turn
+    global cdeck_discard
+
+    card1 = city_deck.pop()
+    card2 = city_deck.pop()
+    print(players[turn]["name"],"drew",card1+"!")
+    print(players[turn]["name"],"drew",card2+"!")
+    
+    if card1!="Epidemic":
+        players[turn]["cards"].append(card1)
+    else:
+        cdeck.discard.append(card1)
+    if card2!="Epidemic":
+        players[turn]["cards"].append(card2)
+    else:
+        cdeck_discard.append(card2)
+    #resolve epidemics
+    if card1=="Epidemic" and card2=="Epidemic":
+        #resolve_double_epidemic()
+        print("OH NO DOUBLE EPIDEMIC DDD:<")
+    elif card1=="Epidemic" or card2=="Epidemic":
+        resolve_epidemic()
+        print("OH NO EPIDEMIC DDD:<")
+    #more than 7 cards?
+    resolve_hand_limit()
+
+def resolve_epidemic():
+    #3 things that happen during an epidemic: reshuffle the infection discard pile
+    global card_counter_index
+    global infect_deck
+    global infect_discard_pile
+    card_counter_index+=1 #increase the counter
+    infected = infect_deck[-1] 
+    infect_deck = infect_deck[:-1]
+    infect_discard_pile.append(infected)
+    place_cubes(infected,3) #put 3 cubes on last card
+    reshuffle()
+    
+
+def resolve_double_epidemic():
+    pass
+
+def resolve_hand_limit():
+    global players
+    global turn
+    while len(players[turn]["cards"])>7:
+        while True:
+            print("You have more than 7 cards!")
+            print("Please type the number of the card that you would like to remove")
+            i=0
+            for card in players[turn]["cards"]:
+                print(str(i+1), players[turn]['cards'][i])
+                i+=1
+            discard = input()
+            try:
+                discard = int(discard)
+                if discard>0 and discard<len(players[turn]['cards']):
+                    temp = players[turn]['cards']
+                    temp = players[turn]['cards'][
+                    #del players[turn]['cards']
+                    #add to discard pile
+                                
+            except:
+                print("Please enter a valid number")
+        
+
+#this function takes a city and number of cubes to be placed and updates the cities dict
+def place_cubes(city, cubes):
+    pass
+
+#this function shuffles the infection discard pile and places it back atop the infection deck
+def reshuffle():
+    pass
+        
+
+    
+    
+    
     
 network=nx.Graph()
 
@@ -242,10 +399,11 @@ events = ["Resilient Population",
           "Forecast"]
 cdeck = list(nodes)+events
 ideck = list(nodes)
-ideck_discard = []
+infect_deck_discard = []
 cdeck_discard = []
 epidemic_counter = 0
-infect_card_counter = 0
+card_counter_index = 0
+card_counter = [2,2,2,3,3,4,4]
 diseases = {"blue":{"cured":False,"eradicated":False,"cubes":24}, "black":{"cured":False,"eradicated":False,"cubes":24},
          "yellow":{"cured":False,"eradicated":False,"cubes":24}, "red":{"cured":False,"eradicated":False,"cubes":24}}
 cities = {
@@ -323,19 +481,28 @@ else:
 while True:
     try:
         temp = int(input("How many players are playing?(2-4)"))
-        break
+        if temp>=2 and temp<=4:
+            break
+        else:
+            print("Please enter a valid number of players.")
+            pass #keep going 
     except:
         print("Please try again.")
-i=0
-while i < temp:
+i=1
+while i <=temp:
     role = random.choice(roles)
     roles.remove(role)
-    if i==0:
-        name = input("What is the first player's name?")
+    if i==1:
+        print("What is the first player's name?")
+        time.sleep(.5)
+        name = input()
     else:
-        name = input("What is the next player's name?")
-    players[name] = {"role": role}
+        print("What is the next player's name?")
+        time.sleep(.5)
+        name = input()
+    players[i] = {"name":name, "role": role, "location":"Atlanta"}
     print(name,"is the",role+"!")
+    time.sleep(1)
     i+=1
 print()
 
@@ -343,6 +510,7 @@ print()
 #this will then determine the order, which is based on card population
 #this means you need to edit the cities dict to add population
 pregame_dealing()
+time.sleep(2)
 
 #once players have initial cards, epidemic cards need to be inserted to the city deck
 pregame_city_deck_prep(piles)
@@ -353,14 +521,43 @@ for subdeck in cdeck: #flatten the list of lists
 
 #the city deck is complete and players have cards. It is now time for infection deck and infecting
 pregame_infect_deck_prep()
+infect_deck = ideck[:] #rename the vars to be consistent
+time.sleep(2)
 
+print()
 print("You are ready to play!")
+print()
+time.sleep(2)
 #main game loop - create a menu of actions and take input for that.
 #               - create methods for each of those actions
 #               - dtermine the order before all of this happens
+turn = 1
+#while you have not yet lost
 while epidemic_counter<8 and len(cdeck)>0: #check for cubes during infection steps
-    pass    
-
+    actions = 4
+    turn_checker()
+    time.sleep(1)
+    #do 4 actions
+    while actions>0:
+        print("You have",actions,"actions remaining.")
+        #this loop is to ensure a proper action
+        while True:
+            action = menu()
+            if is_valid_action(action): #make sure they put in a valid action choice
+                if resolve_action(action): #if the action is possible
+                    actions-=1 #count it as an action
+                    break
+                else:
+                    print("That action is not possible. Please try again.")
+            else:
+                print("Please enter a valid action")
+                pass
+    #draw two city cards
+    draw_two() #calls resolve_epidemic() and resolve_hand_limit()
+    #infect cities
+    infect()
+        
+    
 
 
 
