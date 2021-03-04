@@ -8,14 +8,37 @@ def pregame_dealing():
     global cdeck
     global cdeck_discard
     random.shuffle(cdeck)
-    for player in players:
-        card1 = cdeck.pop()
-        card2 = cdeck.pop()
-        players[player]["cards"] = [card1,card2]
-        cdeck_discard.append(card1)
-        cdeck_discard.append(card2)
-        print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])    
-    
+    if len(players)==4:
+        for player in players:
+            card1 = cdeck.pop()
+            card2 = cdeck.pop()
+            players[player]["cards"] = [card1,card2]
+            cdeck_discard.append(card1)
+            cdeck_discard.append(card2)
+            print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])
+    elif len(players)==3:
+        for player in players:
+            card1 = cdeck.pop()
+            card2 = cdeck.pop()
+            card3 = cdeck.pop()
+            players[player]["cards"] = [card1,card2,card3]
+            cdeck_discard.append(card1)
+            cdeck_discard.append(card2)
+            cdeck_discard.append(card3)
+            print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])
+    else:
+        for player in players:
+            card1 = cdeck.pop()
+            card2 = cdeck.pop()
+            card3 = cdeck.pop()
+            card4 = cdeck.pop()
+            players[player]["cards"] = [card1,card2,card3,card4]
+            cdeck_discard.append(card1)
+            cdeck_discard.append(card2)
+            cdeck_discard.append(card3)
+            cdeck_discard.append(card4)
+            print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])
+        
     
 def pregame_city_deck_prep(piles):
     print("Preparing the city deck...")
@@ -111,25 +134,42 @@ def is_valid_action(action):
         return action=="d"
 
 def resolve_action(action):
-    try:
-        action = int(action)
-        if action==1:
-            return walk()
-        elif action==2:
-            return fly()
-        elif action==3:
-            return exchange_info()
-        elif action==4:
-            return pickup()
-        elif action==5:
-            return cure()
-        elif action==6:
-            return research()
-    except:
-        return display_board()
+    if action=="1":
+        return walk()
+    elif action=="2":
+        return fly()
+    elif action=="3":
+        return exchange_info()
+    elif action=="4":
+        return pickup()
+    elif action=="5":
+        return cure()
+    elif action=="6":
+        return research()
+    return display_board()
 
 def walk():
-    print("I am walking!")
+    global players
+    current = players[turn]['location']
+    connections = list(network.neighbors(current))
+    i=1
+    print("Where would you like to walk to?")
+    for connection in connections:
+        print(i,connection)
+        i+=1
+    choice = input()
+    try:
+        choice = int(choice)
+        if choice>=1 and choice < i:
+            players[turn]['location'] = connections[choice-1]
+        else:
+            print("else")
+            print("Not a valid move")
+            return False
+    except ValueError:
+        print("except")
+        print("Not a valid move")
+        return False
     return True
 
 def fly():
@@ -170,7 +210,7 @@ def draw_two():
     if card1!="Epidemic":
         players[turn]["cards"].append(card1)
     else:
-        cdeck.discard.append(card1)
+        cdeck_discard.append(card1)
     if card2!="Epidemic":
         players[turn]["cards"].append(card2)
     else:
@@ -189,21 +229,24 @@ def resolve_epidemic():
     #3 things that happen during an epidemic: reshuffle the infection discard pile
     global card_counter_index
     global infect_deck
-    global infect_discard_pile
+    global infect_deck_discard
+    global cities
     card_counter_index+=1 #increase the counter
     infected = infect_deck[-1] 
     infect_deck = infect_deck[:-1]
-    infect_discard_pile.append(infected)
-    place_cubes(infected,3) #put 3 cubes on last card
+    infect_deck_discard.append(infected)
+    place_cubes(infected,3, cities[infected]['color']) #put 3 cubes on last card
     reshuffle()
     
 
 def resolve_double_epidemic():
+    print("This test probably won't happen for a while")
     pass
 
 def resolve_hand_limit():
     global players
     global turn
+    global cdeck_discard
     while len(players[turn]["cards"])>7:
         while True:
             print("You have more than 7 cards!")
@@ -215,31 +258,65 @@ def resolve_hand_limit():
             discard = input()
             try:
                 discard = int(discard)
-                if discard>0 and discard<len(players[turn]['cards']):
-                    temp = players[turn]['cards']
-                    temp = players[turn]['cards'][
-                    #del players[turn]['cards']
+                if discard>=1 and discard<=len(players[turn]['cards']):
+                    #remove from hand
+                    players[turn]['cards'] = players[turn]['cards'][:discard] + players[turn]['cards'][discard+1:]
                     #add to discard pile
-                                
+                    cdeck_discard.append(players[turn]['cards'][discard])
+                    break
+                else:
+                    print("Please enter a valid number")
             except:
                 print("Please enter a valid number")
         
-
+def infect():
+    global infect_deck
+    global infect_deck_discard
+    global cities
+    i=0
+    while i<card_counter[card_counter_index]:
+        infected = infect_deck.pop()
+        print(infected,"has been infected with 1",cities[infected]['color'],"cube!")
+        time.sleep(1)
+        place_cubes(infected,1,cities[infected]['color'])
+        infect_deck_discard.append(infected)
+        i+=1
+    
 #this function takes a city and number of cubes to be placed and updates the cities dict
-def place_cubes(city, cubes):
-    pass
+def place_cubes(city, cubes, color, outbreakchain = []):
+    global cities
+    global outbreaks
+    if cities[city]['cubes'][color] + cubes > 3 and cities[city]["quarantined"]==False and city not in outbreakchain:
+        print("Outbreak!")
+        time.sleep(1)
+        outbreaks+=1
+        cities[city]['cubes'][color] = 3
+        resolve_outbreak(city,outbreakchain+[city], color)
+    elif city in outbreakchain:
+        pass #break the chain
+    else:
+        print(city,"has been infected with",cubes,"cubes")
+        cities[city]['cubes'][color] += cubes #place the cubes
+        
+#this function will take a city and place one cube on each unprotected neighboring city
+#need to make sure the outbreaks do not loop into each other - will do this with citylist
+def resolve_outbreak(city, outbreakchain, color):
+    global network
+    connections = nx.neighbors(network,city)
+    print("The connections to this city are:", connections)
+    for connection in connections:
+        place_cubes(connection,1,color,outbreakchain)
+        
 
 #this function shuffles the infection discard pile and places it back atop the infection deck
 def reshuffle():
-    pass
-        
+    global infect_deck_discard
+    global infect_deck
+    random.shuffle(infect_deck_discard)
+    infect_deck = infect_deck_discard + infect_deck
 
-    
-    
-    
-    
+#the making of the graph to determine connections 
 network=nx.Graph()
-
 network.add_node("Atlanta")
 network.add_node("Chicago")
 network.add_node("Washington")
@@ -252,7 +329,6 @@ network.add_node("Essen")
 network.add_node("St. Petersburg")
 network.add_node("Milan")
 network.add_node("Paris")
-
 network.add_node("Miami")
 network.add_node("Mexico City")
 network.add_node("Los Angeles")
@@ -265,7 +341,6 @@ network.add_node("Kinshasa")
 network.add_node("Lagos")
 network.add_node("Khartoum")
 network.add_node("Johannesburg")
-
 network.add_node("Cairo")
 network.add_node("Istanbul")
 network.add_node("Moscow")
@@ -278,7 +353,6 @@ network.add_node("Kolkatta")
 network.add_node("Delhi")
 network.add_node("Algiers")
 network.add_node("Tehran")
-
 network.add_node("Sydney")
 network.add_node("Jakarta")
 network.add_node("Manilla")
@@ -291,8 +365,7 @@ network.add_node("Tokyo")
 network.add_node("Taipei")
 network.add_node("Seoul")
 network.add_node("Osaka")
-
-#blue edges
+#edges
 network.add_edge("Atlanta","Chicago")
 network.add_edge("Atlanta","Washington")
 network.add_edge("Atlanta","Miami")
@@ -322,8 +395,6 @@ network.add_edge("Essen","St. Petersburg")
 network.add_edge("Essen","Milan")
 network.add_edge("St. Petersburg","Moscow")
 network.add_edge("St. Petersburg","Istanbul")
-
-#yellow edges
 network.add_edge("Miami","Mexico City")
 network.add_edge("Miami","Bogota")
 network.add_edge("Bogota","Lima")
@@ -341,8 +412,6 @@ network.add_edge("Khartoum","Kinshasa")
 network.add_edge("Khartoum","Cairo")
 network.add_edge("Los Angeles","Sydney")
 network.add_edge("Los Angeles","Mexico City")
-
-#black edges
 network.add_edge("Algiers","Istanbul")
 network.add_edge("Algiers","Cairo")
 network.add_edge("Istanbul","Moscow")
@@ -368,8 +437,6 @@ network.add_edge("Kolkatta","Bangkok")
 network.add_edge("Chennai","Kolkatta")
 network.add_edge("Chennai","Jakarta")
 network.add_edge("Chennai","Bangkok")
-
-#red edges
 network.add_edge("Jakarta","Sydney")
 network.add_edge("Jakarta","Ho Chi Minh City")
 network.add_edge("Jakarta","Bangkok")
@@ -395,66 +462,66 @@ nodes = network.nodes
 events = ["Resilient Population",
           "One Quiet Night",
           "Airlift",
-          "Governmany Grant",
+          "Governmant Grant",
           "Forecast"]
 cdeck = list(nodes)+events
 ideck = list(nodes)
 infect_deck_discard = []
 cdeck_discard = []
-epidemic_counter = 0
+outbreaks = 0
 card_counter_index = 0
 card_counter = [2,2,2,3,3,4,4]
 diseases = {"blue":{"cured":False,"eradicated":False,"cubes":24}, "black":{"cured":False,"eradicated":False,"cubes":24},
          "yellow":{"cured":False,"eradicated":False,"cubes":24}, "red":{"cured":False,"eradicated":False,"cubes":24}}
 cities = {
-    "Atlanta":{"color":"blue","cubes":0,"research_station":True, "quarantined": False, "population":100},
-    "Chicago":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "San Francisco":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Montreal":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "New York":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Washington":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Madrid":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "London":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Essen":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Paris":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "St. Petersburg":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Milan":{"color":"blue","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Los Angeles":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Mexico City":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Miami":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Bogota":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Lima":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Santiago":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Buenos Aires":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Sao Paolo":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Lagos":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Kinshasa":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Khartoum":{"color":"yellow","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Johannesburg":{"color":"yellow","cubes":0,"research_station":False, "quarantined":False, "population":100},
-    "Cairo":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Algiers":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Istanbul":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Moscow":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Tehran":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Baghdad":{"color":"black","cubes":0,"research_station":False, "quarantined":False, "population":100},
-    "Riyadh":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Delhi":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Karachi":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Mumbai":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Chennai":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Kolkatta":{"color":"black","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Sydney":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Jakarta":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Manilla":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Ho Chi Minh City":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Hong Kong":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Bangkok":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Osaka":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Shanghai":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Beijing":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Tokyo":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Taipei":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
-    "Seoul":{"color":"red","cubes":0,"research_station":False, "quarantined": False, "population":100},
+    "Atlanta":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":True, "quarantined": False, "population":100},
+    "Chicago":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "San Francisco":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Montreal":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "New York":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Washington":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Madrid":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "London":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Essen":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Paris":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "St. Petersburg":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Milan":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Los Angeles":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Mexico City":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Miami":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Bogota":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Lima":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Santiago":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Buenos Aires":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Sao Paolo":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Lagos":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Kinshasa":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Khartoum":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Johannesburg":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined":False, "population":100},
+    "Cairo":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Algiers":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Istanbul":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Moscow":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Tehran":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Baghdad":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined":False, "population":100},
+    "Riyadh":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Delhi":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Karachi":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Mumbai":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Chennai":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Kolkatta":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Sydney":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Jakarta":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Manilla":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Ho Chi Minh City":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Hong Kong":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Bangkok":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Osaka":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Shanghai":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Beijing":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Tokyo":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Taipei":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Seoul":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
  }
 roles = ["Dispatcher","Researcher","Medic","Scientist","Quarantine Specialist","Operations Expert","Contingency Planner"]
 players={}
@@ -533,7 +600,7 @@ time.sleep(2)
 #               - dtermine the order before all of this happens
 turn = 1
 #while you have not yet lost
-while epidemic_counter<8 and len(cdeck)>0: #check for cubes during infection steps
+while outbreaks<8 and len(cdeck)>0: #check for cubes during infection steps
     actions = 4
     turn_checker()
     time.sleep(1)
