@@ -117,8 +117,7 @@ def menu():
     print("5 Cure a Disease")
     print("6 Build a Research Station")
     print("7 Travel to another research Station")
-    print("8 Build a Research Station")
-    print("9 Spend an Event Card")
+    print("8 Spend an Event Card")
     print("d Display Board")
     x=input()
     return x
@@ -126,7 +125,7 @@ def menu():
 def is_valid_action(action):
     try:
         action = int(action)
-        if action>=1 and action<=9:
+        if action>=1 and action<=8:
             return True
         else:
             return False
@@ -149,8 +148,6 @@ def resolve_action(action):
     elif action=="7":
         return goto_research_station()
     elif action=="8":
-        return build_research_station()
-    elif action=="9":
         return eventcard()
     return display_board()
 
@@ -222,9 +219,6 @@ def cure():
 
 def research():
     print("I am building a research station!")
-    return True
-
-def build_research_station():
     return True
 
 def goto_researchstation():
