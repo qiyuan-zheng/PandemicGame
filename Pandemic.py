@@ -106,10 +106,7 @@ def turn_checker():
     global turn
     global players
     print("It is",players[turn]["name"]+str("'s"),"turn as the",players[turn]["role"]+str("!"))
-    if turn==len(players):
-        turn = 1 #start the rotation over
-    else:
-        turn+=1 #else next person
+    
 
 def menu():
     print("Enter the number of your first action or 'd' to display the board:")
@@ -119,6 +116,9 @@ def menu():
     print("4 Pickup Cube(s)")
     print("5 Cure a Disease")
     print("6 Build a Research Station")
+    print("7 Travel to another research Station")
+    print("8 Build a Research Station")
+    print("9 Spend an Event Card")
     print("d Display Board")
     x=input()
     return x
@@ -126,7 +126,7 @@ def menu():
 def is_valid_action(action):
     try:
         action = int(action)
-        if action>=1 and action<=6:
+        if action>=1 and action<=9:
             return True
         else:
             return False
@@ -137,7 +137,7 @@ def resolve_action(action):
     if action=="1":
         return walk()
     elif action=="2":
-        return fly()
+        return direct_flight()
     elif action=="3":
         return exchange_info()
     elif action=="4":
@@ -146,6 +146,12 @@ def resolve_action(action):
         return cure()
     elif action=="6":
         return research()
+    elif action=="7":
+        return goto_research_station()
+    elif action=="8":
+        return build_research_station()
+    elif action=="9":
+        return eventcard()
     return display_board()
 
 def walk():
@@ -172,9 +178,35 @@ def walk():
         return False
     return True
 
-def fly():
-    print("I am flying!")
-    return True
+def direct_flight():
+    global players
+    global cdeck_discard
+    cards = players[turn]['cards']
+    print()
+    print("Enter the number of the city you would like to go to:")
+    i=1
+    for card in cards:
+        print(i,card)
+        i+=1
+    choice = input()
+    try:
+        choice = int(choice)
+        if choice>=1 and choice<=len(cards):
+            card = players[turn]['cards'][choice-1]
+            if card not in events:
+                players[turn]['location'] = card
+                players[turn]['cards'].remove(card)
+                cdeck_discard.append(card)
+                return True
+            else:
+                print("You cannot take a direct flight to an event card")
+                return False
+        else:
+            print("Sorry that action is invalid")
+            return False
+    except ValueError:
+        print("Please enter a valid number next time")
+        return False
 
 def exchange_info():
     print("I am exchanging info!")
@@ -190,6 +222,15 @@ def cure():
 
 def research():
     print("I am building a research station!")
+    return True
+
+def build_research_station():
+    return True
+
+def goto_researchstation():
+    return True
+
+def eventcard():
     return True
 
 def display_board():
@@ -235,6 +276,7 @@ def resolve_epidemic():
     infected = infect_deck[-1] 
     infect_deck = infect_deck[:-1]
     infect_deck_discard.append(infected)
+    print(infected,"has been infected with 3 cubes!")
     place_cubes(infected,3, cities[infected]['color']) #put 3 cubes on last card
     reshuffle()
     
@@ -308,7 +350,7 @@ def place_cubes(city, cubes, color, outbreakchain = []):
     elif city in outbreakchain:
         pass #break the chain
     else:
-        print(city,"has been infected with",cubes,"cubes")
+        #print(city,"has been infected with",cubes,"cubes")
         cities[city]['cubes'][color] += cubes #place the cubes
         
 #this function will take a city and place one cube on each unprotected neighboring city
@@ -475,7 +517,7 @@ nodes = network.nodes
 events = ["Resilient Population",
           "One Quiet Night",
           "Airlift",
-          "Governmant Grant",
+          "Government Grant",
           "Forecast"]
 cdeck = list(nodes)+events
 ideck = list(nodes)
@@ -484,6 +526,7 @@ cdeck_discard = []
 outbreaks = 0
 card_counter_index = 0
 card_counter = [2,2,2,3,3,4,4]
+research_stations = 5 #1 is starting in Atlanta by default
 diseases = {"blue":{"cured":False,"eradicated":False,"cubes":24}, "black":{"cured":False,"eradicated":False,"cubes":24},
          "yellow":{"cured":False,"eradicated":False,"cubes":24}, "red":{"cured":False,"eradicated":False,"cubes":24}}
 cities = {
@@ -636,6 +679,11 @@ while outbreaks<8 and len(cdeck)>0: #check for cubes during infection steps
     draw_two() #calls resolve_epidemic() and resolve_hand_limit()
     #infect cities
     infect()
+    #whose turn?
+    if turn==len(players):
+        turn = 1 #start the rotation over
+    else:
+        turn+=1 #else next person
         
     
 
