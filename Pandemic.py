@@ -260,14 +260,27 @@ def resolve_hand_limit():
                 discard = int(discard)
                 if discard>=1 and discard<=len(players[turn]['cards']):
                     #remove from hand
-                    players[turn]['cards'] = players[turn]['cards'][:discard] + players[turn]['cards'][discard+1:]
+                    #players[turn]['cards'] = players[turn]['cards'][:discard] + players[turn]['cards'][discard+1:]
+                    removed = players[turn]['cards'][discard-1]
+                    players[turn]['cards'].remove(removed)
                     #add to discard pile
-                    cdeck_discard.append(players[turn]['cards'][discard])
+                    cdeck_discard.append(removed)
                     break
                 else:
                     print("Please enter a valid number")
             except:
                 print("Please enter a valid number")
+
+"""
+   0       1    2     3        4         5         6       7   
+['miami','LA','dc','home','ur place','sewer','hospital','mcd's']
+which card do you want to get rid of?(1-8)
+8
+currently: 
+
+
+
+"""
         
 def infect():
     global infect_deck
