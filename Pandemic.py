@@ -1,6 +1,7 @@
 import networkx as nx
 import random
 import time
+import matplotlib as plt
 #nick says use pygame
 
 def pregame_dealing():
@@ -230,7 +231,7 @@ def pickup():
         i=0
         print("What color cube do you want to pick up?")
         for color in cube_types:
-            print(i+1, color))
+            print(i+1, color)
         choice = input()
         try:
             choice = int(choice)
@@ -311,8 +312,8 @@ def eventcard():
     return True
 
 def display_board():
-    print("The board is being displayed! jk")
-    return False
+    plt.draw(network)
+    return False #not an action
 
 def draw_two():
     global city_deck
