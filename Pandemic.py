@@ -213,8 +213,94 @@ def direct_flight():
         return False
 
 def exchange_info():
-    print("I am exchanging info!")
-    return True
+    global players
+    city = players[turn]['location']
+    cards = players[turn]['cards']
+    samespace = []
+    for player in players:
+        if players[player]['location']==city and player!=turn:
+            samespace.append(player)
+    print("Are you(G) giving a card or (T)taking a card?")
+    x = input()
+    if x=="G":
+        if players[turn]['role']=="Researcher" or (city in cards and players[turn]['role']!="Researcher"):
+            print("Which player are you giving the card to?")
+            for player in samespace:
+                print(player,players[player]['name'],'the',players[player]['role'])
+            choice3 = input() #2
+            try:
+                choice3=int(choice3) #2
+                if choice3 in samespace:
+                    if players[turn]['role']=="Researcher":
+                        m = 1
+                        print("What card would you like to give?")
+                        for card in cards:
+                            print(m,card)
+                            m+=1
+                        try:
+                            card = int(input())
+                            if card>=1 and card<=len(cards):
+                                #give that card
+                                players[choice3]['cards'].append(players[turn]['cards'][m-1])
+                                players[turn]['cards'].remove(players[turn]['cards'][m-1])
+                                print("Exchange Successful!")
+                                return True
+                        except ValueError:
+                            return False
+                    else:
+                        #trade the card of the city you are in
+                        players[turn]['cards'].append(city)
+                        players[choice3]['cards'].remove(city)
+                        print("Exchange successful!")
+                        return True
+                else:
+                    return False
+            except ValueError:
+                return False
+    elif x=="T":
+        print("Choose the player you would like to take a card from")
+        for player in samespace:
+            print(player,players[player]['name'],'the',players[player]['role'])
+        choice = input() #which player
+        try:
+            choice = int(choice)
+            if choice in samespace:
+                if players[choice]['role']=="Researcher": #people can take any card from researcher
+                    j=1
+                    print("Which card would you like to take?")
+                    for card in players[choice]['cards']:
+                        print(j,card)
+                        j+=1
+                    choice2 = input()
+                    try:
+                        choice2=int(choice2)
+                        if choice2>=1 and choice2<=len(players[choice]['cards']):
+                            #trade that card
+                            players[turn]['cards'].append(players[choice]['cards'][choice2-1])
+                            players[choice]['cards'].remove(players[choice]['cards'][choice2-1])
+                            print("Exchange successful!")
+                            return True
+                        else:
+                            return False
+                    except:
+                        return False
+                        
+                    return True
+                #elif normal player
+                elif city in players[choice]['cards']: #people may only take same-city cards from non-researchers
+                    #trade that card
+                    players[turn]['cards'].append(city)
+                    players[choice]['cards'].remove(city)
+                    print("Exchange successful!")
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        except ValueError:
+            return False
+    else:
+        return False       
 
 #this function returns a list of the color of cubes in the current city
 def get_cube_types():
