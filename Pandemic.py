@@ -96,7 +96,7 @@ def pregame_infect_deck_prep():
         while j<3:
             city = random.choice(ideck)
             print(city,"has been infected with",i,cities[city]["color"],"cubes!")
-            cities[city]["cubes"] = i
+            cities[city]["cubes"][cities[city]['color']] = i
             ideck.remove(city)
             infect_deck_discard.append(city)
             j+=1
@@ -110,7 +110,10 @@ def turn_checker():
     
 
 def menu():
-    print("Enter the number of your first action or 'd' to display the board:")
+    if actions==4:
+        print("Enter the option for your first action:")
+    else:
+        print("Enter the option for your next action:")
     print("1 Walk")
     print("2 Fly")
     print("3 Exchange Information (Trade Cards)")
@@ -119,6 +122,7 @@ def menu():
     print("6 Build a Research Station")
     print("7 Travel to another research Station")
     print("8 Spend an Event Card")
+    print("c Display Cards")
     print("d Display Board")
     x=input()
     return x
@@ -131,7 +135,7 @@ def is_valid_action(action):
         else:
             return False
     except:
-        return action=="d"
+        return action=="d" or action=="c"
 
 def resolve_action(action):
     if action=="1":
@@ -150,6 +154,8 @@ def resolve_action(action):
         return goto_research_station()
     elif action=="8":
         return eventcard()
+    elif action=="c":
+        return display_cards()
     return display_board()
 
 def walk():
@@ -225,6 +231,7 @@ def pickup():
     cube_types = get_cube_types() 
     if len(cube_types)==0:
         print("No cubes here!")
+        return False
     elif len(cube_types)==1:
         color = cube_types[0]
     else:
@@ -245,16 +252,18 @@ def pickup():
         diseases[color]['cubes']+= cities[players[turn]['location']]['cubes'][color]
         cities[players[turn]['location']]['cubes'][color] = 0
         print("The medic cleared",players[turn]['location']+"!")
-        return True
     elif players[turn]['role']=="Medic" and diseases[color]['cured']:
         print("This will happen by default from the medic visiting here. Not counting as an action")
         return False
     elif diseases[color]['cured']:
         diseases[color]['cubes']+= cities[players[turn]['location']]['cubes'][color]
         cities[players[turn]['location']]['cubes'][color] = 0
+        print(players[turn]['role'],"cleared",players[turn]['location']+"!")
+
     else:
         diseases[color]['cubes']+= 1
         cities[players[turn]['location']]['cubes'][color] -= 1
+        print(players[turn]['role'],"cleared 1 cube off of",players[turn]['location']+"!")
     return True
 
 def cure():
@@ -301,18 +310,20 @@ def goto_research_station():
         except ValueError:
             return False
     else:
-        print("that action is not valid")
+        print("That action is not valid")
         return False
-                
-                
-        
     return True
 
 def eventcard():
     return True
 
+def display_cards():
+    for player in players:
+        print(players[player]['name']+"'s cards:", players[player]['cards'])
+    return False #not an action
+
 def display_board():
-    plt.draw(network)
+    nx.draw(network)
     return False #not an action
 
 def draw_two():
@@ -445,9 +456,9 @@ def medic_passive(city):
     global cities
     global diseases
     for disease in diseases:
-        if disease['cured']==True:
-            disease['cubes']+= cities[city]['cubes'][disease['name']]
-            cities[city]['cubes'][disease['name']] = 0
+        if diseases[disease]['cured']==True:
+            diseases[disease]['cubes']+= cities[city]['cubes'][diseases[disease]['name']]
+            cities[city]['cubes'][diseases[disease]['name']] = 0
             print("The medic cleared",city,"upon passing through!")
     
             
@@ -609,7 +620,7 @@ outbreaks = 0
 card_counter_index = 0
 card_counter = [2,2,2,3,3,4,4]
 research_stations = 5 #1 is starting in Atlanta by default
-diseases = {"blue":{"name":"blue","cured":False,"eradicated":False,"cubes":24}, "black":{"name","black","cured":False,"eradicated":False,"cubes":24},
+diseases = {"blue":{"name":"blue","cured":False,"eradicated":False,"cubes":24}, "black":{"name":"black","cured":False,"eradicated":False,"cubes":24},
          "yellow":{"name":"yellow","cured":False,"eradicated":False,"cubes":24}, "red":{"name":"red","cured":False,"eradicated":False,"cubes":24}}
 cities = {
     "Atlanta":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":True, "quarantined": False, "population":100},
@@ -753,7 +764,7 @@ while outbreaks<8 and len(cdeck)>=0 and diseases['black']['cubes']>0 and disease
                     actions-=1 #count it as an action
                     #additional medic check
                     if players[turn]['role']=='Medic': #the medic clears cities of cured diseases everywhere he steps so check for that as he goes
-                        medic_pasive(player[turn]['location'])
+                        medic_passive(players[turn]['location'])
                     break
                 else:
                     print("That action is not possible. Please try again.")
