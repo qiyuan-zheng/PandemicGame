@@ -209,8 +209,51 @@ def exchange_info():
     print("I am exchanging info!")
     return True
 
+#this function returns a list of the color of cubes in the current city
+def get_cube_types():
+    cube_types = []
+    city = players[turn]['location']
+    for color in cities[city]['cubes']:
+        if cities[city]['cubes'][color]>0:
+            cube_types.append(color)
+    return cube_types
+
 def pickup():
-    print("I am picking up cubes!")
+    global cities
+    global diseases
+    cube_types = get_cube_types() 
+    if len(cube_types)==0:
+        print("No cubes here!")
+    elif len(cube_types)==1:
+        color = cube_types[0]
+    else:
+        i=0
+        print("What color cube do you want to pick up?")
+        for color in cube_types:
+            print(i+1, color))
+        choice = input()
+        try:
+            choice = int(choice)
+            if choice>=1 and choice<=len(cube_types):
+                color = cube_types[choice-1]
+            else:
+                return False
+        except:
+            return False    
+    if players[turn]['role']=="Medic" and diseases[color]['cured']==False:
+        diseases[color]['cubes']+= cities[players[turn]['location']]['cubes'][color]
+        cities[players[turn]['location']]['cubes'][color] = 0
+        print("The medic cleared",players[turn]['location']+"!")
+        return True
+    elif players[turn]['role']=="Medic" and diseases[color]['cured']:
+        print("This will happen by default from the medic visiting here. Not counting as an action")
+        return False
+    elif diseases[color]['cured']:
+        diseases[color]['cubes']+= cities[players[turn]['location']]['cubes'][color]
+        cities[players[turn]['location']]['cubes'][color] = 0
+    else:
+        diseases[color]['cubes']+= 1
+        cities[players[turn]['location']]['cubes'][color] -= 1
     return True
 
 def cure():
@@ -221,12 +264,14 @@ def research():
     global cities
     global cdeck_discard
     global players
+    global research_stations
     cards = players[turn]['cards']
-    if players[turn]['location'] in cards:
+    if players[turn]['location'] in cards and research_stations>0:
         card = players[turn]['location']
         cities[card]['research_station'] = True
         cdeck_discard.append(card)#spend it to make reserach station
         players[turn]['cards'].remove(card)
+        research_stations-=1
         return True
     else:
         print("You do not have that card!")
@@ -346,17 +391,6 @@ def resolve_hand_limit():
             except:
                 print("Please enter a valid number")
 
-"""
-   0       1    2     3        4         5         6       7   
-['miami','LA','dc','home','ur place','sewer','hospital','mcd's']
-which card do you want to get rid of?(1-8)
-8
-currently: 
-
-
-
-"""
-        
 def infect():
     global infect_deck
     global infect_deck_discard
@@ -374,8 +408,10 @@ def infect():
 def place_cubes(city, cubes, color, outbreakchain = []):
     global cities
     global outbreaks
+    global diseases
     if cities[city]['cubes'][color] + cubes > 3 and cities[city]["quarantined"]==False and city not in outbreakchain:
         print("Outbreak!")
+        diseases[color]['cubes']-= 3 - cities[city]['cubes'][color] #subtract the amount of cubes to get to 3
         time.sleep(1)
         outbreaks+=1
         cities[city]['cubes'][color] = 3
@@ -383,13 +419,12 @@ def place_cubes(city, cubes, color, outbreakchain = []):
     elif city in outbreakchain:
         pass #break the chain
     else:
-        #print(city,"has been infected with",cubes,"cubes")
+        diseases[color]['cubes'] -= cubes
         cities[city]['cubes'][color] += cubes #place the cubes
         
 #this function will take a city and place one cube on each unprotected neighboring city
 #need to make sure the outbreaks do not loop into each other - will do this with citylist
 def resolve_outbreak(city, outbreakchain, color):
-    global network
     connections = nx.neighbors(network,city)
     print("The connections to this city are:", connections)
     for connection in connections:
@@ -404,6 +439,18 @@ def reshuffle():
     infect_deck = infect_deck_discard + infect_deck
     infect_deck_discard = []
 
+#this is a function that is called at the end of every medic action to ensure he clears infected cities he passes through
+def medic_passive(city):
+    global cities
+    global diseases
+    for disease in diseases:
+        if disease['cured']==True:
+            disease['cubes']+= cities[city]['cubes'][disease['name']]
+            cities[city]['cubes'][disease['name']] = 0
+            print("The medic cleared",city,"upon passing through!")
+    
+            
+    
 #the making of the graph to determine connections 
 network=nx.Graph()
 network.add_node("Atlanta")
@@ -561,8 +608,8 @@ outbreaks = 0
 card_counter_index = 0
 card_counter = [2,2,2,3,3,4,4]
 research_stations = 5 #1 is starting in Atlanta by default
-diseases = {"blue":{"cured":False,"eradicated":False,"cubes":24}, "black":{"cured":False,"eradicated":False,"cubes":24},
-         "yellow":{"cured":False,"eradicated":False,"cubes":24}, "red":{"cured":False,"eradicated":False,"cubes":24}}
+diseases = {"blue":{"name":"blue","cured":False,"eradicated":False,"cubes":24}, "black":{"name","black","cured":False,"eradicated":False,"cubes":24},
+         "yellow":{"name":"yellow","cured":False,"eradicated":False,"cubes":24}, "red":{"name":"red","cured":False,"eradicated":False,"cubes":24}}
 cities = {
     "Atlanta":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":True, "quarantined": False, "population":100},
     "Chicago":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
@@ -690,7 +737,7 @@ time.sleep(2)
 #               - dtermine the order before all of this happens
 turn = 1
 #while you have not yet lost
-while outbreaks<8 and len(cdeck)>0: #check for cubes during infection steps
+while outbreaks<8 and len(cdeck)>=0 and diseases['black']['cubes']>0 and diseases['blue']['cubes']>0 and diseases['red']['cubes']>0 and diseases['yellow']['cubes']>0:
     actions = 4
     turn_checker()
     time.sleep(1)
@@ -703,6 +750,9 @@ while outbreaks<8 and len(cdeck)>0: #check for cubes during infection steps
             if is_valid_action(action): #make sure they put in a valid action choice
                 if resolve_action(action): #if the action is possible
                     actions-=1 #count it as an action
+                    #additional medic check
+                    if players[turn]['role']=='Medic': #the medic clears cities of cured diseases everywhere he steps so check for that as he goes
+                        medic_pasive(player[turn]['location'])
                     break
                 else:
                     print("That action is not possible. Please try again.")
