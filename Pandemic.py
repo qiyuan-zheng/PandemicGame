@@ -218,16 +218,28 @@ def cure():
     return True
 
 def research():
-    print("I am building a research station!")
-    return True
+    global cities
+    global cdeck_discard
+    global players
+    cards = players[turn]['cards']
+    if players[turn]['location'] in cards:
+        card = players[turn]['location']
+        cities[card]['research_station'] = True
+        cdeck_discard.append(card)#spend it to make reserach station
+        players[turn]['cards'].remove(card)
+        return True
+    else:
+        print("You do not have that card!")
+        return False
 
-def goto_researchstation():
+def goto_research_station():
+    global players
     city = players[turn]['location']
     if cities[city]['research_station']==True:
         i=0
         stations = []
         for othercity in cities:
-            if cities[othercity]['research_station']==True:
+            if cities[othercity]['research_station']==True and othercity!=city:
                 stations.append(othercity)
                 print(i+1,othercity)
                 i+=1
@@ -299,6 +311,7 @@ def resolve_epidemic():
     print(infected,"has been infected with 3 cubes!")
     place_cubes(infected,3, cities[infected]['color']) #put 3 cubes on last card
     reshuffle()
+    infect()
     
 
 def resolve_double_epidemic():
@@ -389,6 +402,7 @@ def reshuffle():
     global infect_deck
     random.shuffle(infect_deck_discard)
     infect_deck = infect_deck_discard + infect_deck
+    infect_deck_discard = []
 
 #the making of the graph to determine connections 
 network=nx.Graph()
