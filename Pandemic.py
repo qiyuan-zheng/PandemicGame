@@ -222,6 +222,32 @@ def research():
     return True
 
 def goto_researchstation():
+    city = players[turn]['location']
+    if cities[city]['research_station']==True:
+        i=0
+        stations = []
+        for othercity in cities:
+            if cities[othercity]['research_station']==True:
+                stations.append(othercity)
+                print(i+1,othercity)
+                i+=1
+        choice = input()
+        try:
+            choice = int(choice)
+            if choice>=1 and choice<=len(stations):
+                players[turn]['location'] = stations[i-1]
+                return True
+            else:
+                print("Not a valid number")
+                return False
+        except ValueError:
+            return False
+    else:
+        print("that action is not valid")
+        return False
+                
+                
+        
     return True
 
 def eventcard():
