@@ -275,17 +275,23 @@ def research():
     global cdeck_discard
     global players
     global research_stations
-    cards = players[turn]['cards']
-    if players[turn]['location'] in cards and research_stations>0:
-        card = players[turn]['location']
-        cities[card]['research_station'] = True
-        cdeck_discard.append(card)#spend it to make reserach station
-        players[turn]['cards'].remove(card)
+    city = players[turn]['location']
+    if players[turn]['role']=="Operations Expert" and research_stations>0 and cities[city]['research_station']==False:
+        cities[city]['research_station'] = True
         research_stations-=1
         return True
     else:
-        print("You do not have that card!")
-        return False
+        cards = players[turn]['cards']
+        if players[turn]['location'] in cards and research_stations>0:
+            card = players[turn]['location']
+            cities[card]['research_station'] = True
+            cdeck_discard.append(card)#spend it to make reserach station
+            players[turn]['cards'].remove(card)
+            research_stations-=1
+            return True
+        else:
+            print("You do not have that card!")
+            return False
 
 def goto_research_station():
     global players
@@ -323,7 +329,7 @@ def display_cards():
     return False #not an action
 
 def display_board():
-    nx.draw(network)
+    print("I am displaying the board")
     return False #not an action
 
 def draw_two():
@@ -766,16 +772,17 @@ while outbreaks<8 and len(cdeck)>=0 and diseases['black']['cubes']>0 and disease
                     if players[turn]['role']=='Medic': #the medic clears cities of cured diseases everywhere he steps so check for that as he goes
                         medic_passive(players[turn]['location'])
                     break
+                elif action=='c' or action=='d':
+                    pass 
                 else:
                     print("That action is not possible. Please try again.")
             else:
                 print("Please enter a valid action")
-                pass
-    #draw two city cards
+    #draw 2 city cards
     draw_two() #calls resolve_epidemic() and resolve_hand_limit()
-    #infect cities
-    infect()
-    #whose turn?
+    infect()     #infect cities
+
+    #next turn
     if turn==len(players):
         turn = 1 #start the rotation over
     else:
