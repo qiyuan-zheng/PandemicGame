@@ -457,7 +457,7 @@ def medic_passive(city):
     global diseases
     for disease in diseases:
         if diseases[disease]['cured']==True:
-            diseases[disease]['cubes']+= cities[city]['cubes'][diseases[disease]['name']]
+            diseases[disease]['cubes']+= cities[city]['cubes'][diseases[disease]['name']] 
             cities[city]['cubes'][diseases[disease]['name']] = 0
             print("The medic cleared",city,"upon passing through!")
     
