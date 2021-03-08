@@ -123,6 +123,7 @@ def menu():
     print("7 Travel to another research Station")
     print("8 Spend an Event Card")
     print("c Display Cards")
+    print("f Display Cubes")
     print("d Display Board")
     x=input()
     return x
@@ -135,7 +136,7 @@ def is_valid_action(action):
         else:
             return False
     except:
-        return action=="d" or action=="c"
+        return action=="d" or action=="c" or action=="f"
 
 def resolve_action(action):
     if action=="1":
@@ -156,6 +157,8 @@ def resolve_action(action):
         return eventcard()
     elif action=="c":
         return display_cards()
+    elif action=="f":
+        return display_cubes()
     return display_board()
 
 def walk():
@@ -414,6 +417,18 @@ def display_cards():
         print(players[player]['name']+"'s cards:", players[player]['cards'])
     return False #not an action
 
+def display_cubes():
+    for city in cities:
+        if cities[city]['cubes']['red']==0 and cities[city]['cubes']['blue']==0  and cities[city]['cubes']['yellow']==0  and cities[city]['cubes']['black']==0:
+            pass
+        else:
+            colors = ['red','black','blue','yellow']
+            acc = city+" has: "
+            for color in colors:
+                if cities[city]['cubes'][color]>0:
+                    acc+= str(cities[city]['cubes'][color])+color+" cubes and "
+            print(acc)
+                    
 def display_board():
     print("I am displaying the board")
     return False #not an action
@@ -442,8 +457,9 @@ def draw_two():
         #resolve_double_epidemic()
         print("OH NO DOUBLE EPIDEMIC DDD:<")
     elif card1=="Epidemic" or card2=="Epidemic":
-        resolve_epidemic()
         print("OH NO EPIDEMIC DDD:<")
+        resolve_epidemic()
+        
     #more than 7 cards?
     resolve_hand_limit()
 
@@ -460,8 +476,8 @@ def resolve_epidemic():
     print(infected,"has been infected with 3 cubes!")
     place_cubes(infected,3, cities[infected]['color']) #put 3 cubes on last card
     reshuffle()
-    infect()
-    
+    #infect() #get rid of this line!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #why is the infect discard not going back on top?
 
 def resolve_double_epidemic():
     print("This test probably won't happen for a while")
@@ -501,7 +517,7 @@ def infect():
     global cities
     i=0
     while i<card_counter[card_counter_index]:
-        infected = infect_deck.pop()
+        infected = infect_deck.pop(0)
         print(infected,"has been infected with 1",cities[infected]['color'],"cube!")
         time.sleep(1)
         place_cubes(infected,1,cities[infected]['color'])
@@ -650,6 +666,7 @@ network.add_edge("Lagos","Khartoum")
 network.add_edge("Khartoum","Johannesburg")
 network.add_edge("Khartoum","Kinshasa")
 network.add_edge("Khartoum","Cairo")
+network.add_edge("Kinshasa","Johannesburg")
 network.add_edge("Los Angeles","Sydney")
 network.add_edge("Los Angeles","Mexico City")
 network.add_edge("Algiers","Istanbul")
