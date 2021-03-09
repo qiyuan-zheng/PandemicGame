@@ -356,8 +356,45 @@ def pickup():
     return True
 
 def cure():
-    print("I am curing!")
+    """
+    city = players[turn]['location']
+    if cities[city]['research station']:
+        print("Which disease would you like to cure?")
+        for disease in diseases:
+            print(disease)
+        choice = input()
+        if choice in diseases:
+            pass
+        else:
+            return False
+        count=0
+        turn_in=[]
+        for card in players[turn]['cards']:
+            if cities[card]['color']==choice:
+                turn_in.append(city)
+                count+=1
+        if (players[turn]['role']=="Scientist" and count==4) or count==5:
+            for temp in turn_in:
+                #remove from hand
+                #add to discard pile
+                #change the diseases dict
+            return True
+        elif (players[turn]['role']=="Scientist" and count>4) or count>5:
+            while len(turn_in)>5:
+                delete = input("Enter the name of the city you would like to keep")#ask which card(s) they want to keep
+                if delete in turn_in:
+                    turn_in.remove(delete)
+                else:
+                    print("That is not a city that you can keep")
+            for temp in turn_in:
+                #remove from hand
+                #add to discard pile
+                #change the diseases dict
+            return True
+        else:
+            return False"""
     return True
+    
 
 def research():
     global cities
@@ -546,7 +583,10 @@ def place_cubes(city, cubes, color, outbreakchain = []):
 #need to make sure the outbreaks do not loop into each other - will do this with citylist
 def resolve_outbreak(city, outbreakchain, color):
     connections = nx.neighbors(network,city)
-    print("The connections to this city are:", connections)
+    acc=[]
+    for connection in connections:
+        acc.append(connection)
+    print("The connections to this city are:", acc)
     for connection in connections:
         place_cubes(connection,1,color,outbreakchain)
         
