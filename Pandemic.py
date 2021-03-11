@@ -226,7 +226,7 @@ def exchange_info():
     print("Are you(G) giving a card or (T)taking a card?")
     x = input()
     if x=="G":
-        if players[turn]['role']=="Researcher" or (city in cards and players[turn]['role']!="Researcher"):
+        if players[turn]['role']=="Researcher" or (city in cards):
             print("Which player are you giving the card to?")
             for player in samespace:
                 print(player,players[player]['name'],'the',players[player]['role'])
@@ -356,46 +356,60 @@ def pickup():
     return True
 
 def cure():
-    """
     city = players[turn]['location']
-    if cities[city]['research station']:
+    if cities[city]['research_station']:
         print("Which disease would you like to cure?")
         for disease in diseases:
             print(disease)
         choice = input()
-        if choice in diseases:
-            pass
-        else:
+        if choice not in diseases:
             return False
         count=0
         turn_in=[]
         for card in players[turn]['cards']:
             if cities[card]['color']==choice:
                 turn_in.append(city)
-                count+=1
+        count=len(turn_in)
         if (players[turn]['role']=="Scientist" and count==4) or count==5:
             for temp in turn_in:
-                #remove from hand
-                #add to discard pile
-                #change the diseases dict
+                cure_helper(turn_in,choice)
             return True
         elif (players[turn]['role']=="Scientist" and count>4) or count>5:
-            while len(turn_in)>5:
-                delete = input("Enter the name of the city you would like to keep")#ask which card(s) they want to keep
-                if delete in turn_in:
-                    turn_in.remove(delete)
-                else:
-                    print("That is not a city that you can keep")
+            turn_in = which_cards(turn_in)
             for temp in turn_in:
-                #remove from hand
-                #add to discard pile
-                #change the diseases dict
+                cure_helper(turn_in,choice)
             return True
         else:
-            return False"""
-    return True
-    
+            return False
+    return False
 
+def which_cards(turn_in):
+    if players[turn]['role']=="Scientist":
+        limit=4
+    else:
+        limit=5
+    while len(turn_in)>limit:
+        print("Enter a card would you like to keep(not turn in)")
+        for card in turn_in:
+            print(card)
+        keep = input()
+        if keep not in turn_in:
+            print("I think this would turn them all in...")
+            break
+        else:
+            turn_in.remove(card)
+    return turn_in
+            
+    
+def cure_helper(turn_in, disease):
+    global players
+    global diseases
+    global cdeck_discard
+    for card in turn_in:
+        players[turn]['cards'].remove(card)
+        cdeck_discard.append(card)
+    diseases[disease]['cured']=True
+        
 def research():
     global cities
     global cdeck_discard
