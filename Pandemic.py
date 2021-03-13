@@ -623,7 +623,16 @@ def medic_passive(city):
             cities[city]['cubes'][diseases[disease]['name']] = 0
             print("The medic cleared",city,"upon passing through!")
     
-            
+#this will determine the player with the lowest population. they will start the game            
+def who_is_first():
+    least = 1000000000
+    least_player=0
+    for player in players:
+        for card in players[player]['cards']:
+            if cities[card]['population']<least:
+                least = cities[card]['population']
+                least_player = player
+    return least_player
     
 #the making of the graph to determine connections 
 network=nx.Graph()
@@ -786,54 +795,54 @@ research_stations = 5 #1 is starting in Atlanta by default
 diseases = {"blue":{"name":"blue","cured":False,"eradicated":False,"cubes":24}, "black":{"name":"black","cured":False,"eradicated":False,"cubes":24},
          "yellow":{"name":"yellow","cured":False,"eradicated":False,"cubes":24}, "red":{"name":"red","cured":False,"eradicated":False,"cubes":24}}
 cities = {
-    "Atlanta":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":True, "quarantined": False, "population":100},
-    "Chicago":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "San Francisco":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Montreal":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "New York":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Washington":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Madrid":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "London":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Essen":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Paris":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "St. Petersburg":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Milan":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Los Angeles":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Mexico City":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Miami":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Bogota":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Lima":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Santiago":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Buenos Aires":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Sao Paolo":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Lagos":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Kinshasa":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Khartoum":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Johannesburg":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined":False, "population":100},
-    "Cairo":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Algiers":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Istanbul":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Moscow":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Tehran":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Baghdad":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined":False, "population":100},
-    "Riyadh":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Delhi":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Karachi":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Mumbai":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Chennai":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Kolkatta":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Sydney":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Jakarta":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Manilla":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Ho Chi Minh City":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Hong Kong":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Bangkok":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Osaka":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Shanghai":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Beijing":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Tokyo":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Taipei":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
-    "Seoul":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":100},
+    "Atlanta":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":True, "quarantined": False, "population":4715000},
+    "Chicago":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":9121000},
+    "San Francisco":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":5864000},
+    "Montreal":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":3429000},
+    "New York":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":20464000},
+    "Washington":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":4679000},
+    "Madrid":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":5427000},
+    "London":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":8586000},
+    "Essen":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":575000},
+    "Paris":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":10755000},
+    "St. Petersburg":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":4879000},
+    "Milan":{"color":"blue","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":5232000},
+    "Los Angeles":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":14900000},
+    "Mexico City":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":19463000},
+    "Miami":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":5582000},
+    "Bogota":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":8702000},
+    "Lima":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":9121000},
+    "Santiago":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":6015000},
+    "Buenos Aires":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":13639000},
+    "Sao Paolo":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":20186000},
+    "Lagos":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":11547000},
+    "Kinshasa":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":9046000},
+    "Khartoum":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":4887000},
+    "Johannesburg":{"color":"yellow","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined":False, "population":3888000},
+    "Cairo":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":17718000},
+    "Algiers":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":2946000},
+    "Istanbul":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":13576000},
+    "Moscow":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":15512000},
+    "Tehran":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":7419000},
+    "Baghdad":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined":False, "population":6204000},
+    "Riyadh":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":5037000},
+    "Delhi":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":22242000},
+    "Karachi":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":20711000},
+    "Mumbai":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":16910000},
+    "Chennai":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":8865000},
+    "Kolkatta":{"color":"black","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":14374000},
+    "Sydney":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":3785000},
+    "Jakarta":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":26063000},
+    "Manilla":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":20767000},
+    "Ho Chi Minh City":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":8314000},
+    "Hong Kong":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":7106000},
+    "Bangkok":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":7151000},
+    "Osaka":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":2871000},
+    "Shanghai":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":13482000},
+    "Beijing":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":17311000},
+    "Tokyo":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":13189000},
+    "Taipei":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":8338000},
+    "Seoul":{"color":"red","cubes":{"blue":0,"black":0,"yellow":0,"red":0},"research_station":False, "quarantined": False, "population":22547000},
  }
 roles = ["Dispatcher","Researcher","Medic","Scientist","Quarantine Specialist","Operations Expert","Contingency Planner"]
 players={}
@@ -907,10 +916,12 @@ print()
 print("You are ready to play!")
 print()
 time.sleep(2)
-#main game loop - create a menu of actions and take input for that.
-#               - create methods for each of those actions
-#               - dtermine the order before all of this happens
-turn = 1
+
+#
+#main game loop
+#
+
+turn = who_is_first()
 #while you have not yet lost
 while outbreaks<8 and len(cdeck)>=0 and diseases['black']['cubes']>0 and diseases['blue']['cubes']>0 and diseases['red']['cubes']>0 and diseases['yellow']['cubes']>0:
     actions = 4
