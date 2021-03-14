@@ -222,86 +222,81 @@ def exchange_info():
     samespace = []
     for player in players:
         if players[player]['location']==city and player!=turn:
-            samespace.append(player)
+            samespace.append(str(player))
+    print('samespace', samespace)
     print("Are you(G) giving a card or (T)taking a card?")
     x = input()
     if x=="G":
-        if players[turn]['role']=="Researcher" or (city in cards):
+        if players[turn]['role']=="Researcher" or city in cards:
             print("Which player are you giving the card to?")
             for player in samespace:
-                print(player,players[player]['name'],'the',players[player]['role'])
-            choice3 = input() #2
-            try:
-                choice3=int(choice3) #2
-                if choice3 in samespace:
-                    if players[turn]['role']=="Researcher":
-                        m = 1
-                        print("What card would you like to give?")
-                        for card in cards:
-                            print(m,card)
-                            m+=1
-                        try:
-                            card = int(input())
-                            if card>=1 and card<=len(cards):
-                                #give that card
-                                players[choice3]['cards'].append(players[turn]['cards'][m-1])
-                                players[turn]['cards'].remove(players[turn]['cards'][m-1])
-                                print("Exchange Successful!")
-                                return True
-                        except ValueError:
-                            return False
-                    else:
-                        #trade the card of the city you are in
-                        players[turn]['cards'].append(city)
-                        players[choice3]['cards'].remove(city)
-                        print("Exchange successful!")
-                        return True
+                print(player,players[int(player)]['name'],'the',players[int(player)]['role'])
+            choice3 = input() 
+            if choice3 in samespace:
+                if players[turn]['role']=="Researcher":
+                    m = 1
+                    print("What card would you like to give?")
+                    for card in cards:
+                        print(m,card)
+                        m+=1
+                    try:
+                        card = int(input())
+                        if card>=1 and card<=len(cards):
+                            #give that card
+                            players[int(choice3)]['cards'].append(players[turn]['cards'][card-1])
+                            players[turn]['cards'].remove(players[turn]['cards'][card-1])
+                            print("Exchange Successful!")
+                            return True
+                    except ValueError:
+                        return False
                 else:
-                    return False
-            except ValueError:
+                    #trade the card of the city you are in
+                    players[int(choice3)]['cards'].append(city)
+                    players[turn]['cards'].remove(city)
+                    print("Exchange successful!")
+                    return True
+            else:
                 return False
     elif x=="T":
         print("Choose the player you would like to take a card from")
         for player in samespace:
-            print(player,players[player]['name'],'the',players[player]['role'])
+            print(player,players[int(player)]['name'],'the',players[int(player)]['role'])
         choice = input() #which player
-        try:
-            choice = int(choice)
-            if choice in samespace:
-                if players[choice]['role']=="Researcher": #people can take any card from researcher
-                    j=1
-                    print("Which card would you like to take?")
-                    for card in players[choice]['cards']:
-                        print(j,card)
-                        j+=1
-                    choice2 = input()
-                    try:
-                        choice2=int(choice2)
-                        if choice2>=1 and choice2<=len(players[choice]['cards']):
-                            #trade that card
-                            players[turn]['cards'].append(players[choice]['cards'][choice2-1])
-                            players[choice]['cards'].remove(players[choice]['cards'][choice2-1])
-                            print("Exchange successful!")
-                            return True
-                        else:
-                            return False
-                    except:
+
+        if choice in samespace:
+            if players[int(choice)]['role']=="Researcher": #people can take any card from researcher
+                j=1
+                print("Which card would you like to take?")
+                for card in players[int(choice)]['cards']:
+                    print(j,card)
+                    j+=1
+                choice2 = input()
+                try:
+                    choice2=int(choice2)
+                    if choice2>=1 and choice2<=len(players[int(choice)]['cards']):
+                        #trade that card
+                        players[turn]['cards'].append(players[int(choice)]['cards'][choice2-1])
+                        players[int(choice)]['cards'].remove(players[int(choice)]['cards'][choice2-1])
+                        print("Exchange successful!")
+                        return True
+                    else:
                         return False
-                        
-                    return True
-                #elif normal player
-                elif city in players[choice]['cards']: #people may only take same-city cards from non-researchers
-                    #trade that card
-                    players[turn]['cards'].append(city)
-                    players[choice]['cards'].remove(city)
-                    print("Exchange successful!")
-                    return True
-                else:
+                except:
                     return False
+                    
+                return True
+            #elif normal player
+            elif city in players[int(choice)]['cards']: #people may only take same-city cards from non-researchers
+                #trade that card
+                players[turn]['cards'].append(city)
+                players[int(choice)]['cards'].remove(city)
+                print("Exchange successful!")
+                return True
             else:
                 return False
-        except ValueError:
+        else:
             return False
+        
     else:
         return False       
 
@@ -367,7 +362,7 @@ def cure():
         count=0
         turn_in=[]
         for card in players[turn]['cards']:
-            if cities[card]['color']==choice:
+            if card not in events and cities[card]['color']==choice:
                 turn_in.append(city)
         count=len(turn_in)
         if (players[turn]['role']=="Scientist" and count==4) or count==5:
@@ -629,7 +624,7 @@ def who_is_first():
     least_player=0
     for player in players:
         for card in players[player]['cards']:
-            if cities[card]['population']<least:
+            if card not in events and cities[card]['population']<least:
                 least = cities[card]['population']
                 least_player = player
     return least_player
