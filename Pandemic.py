@@ -14,8 +14,8 @@ def pregame_dealing():
             card1 = cdeck.pop()
             card2 = cdeck.pop()
             players[player]["cards"] = [card1,card2]
-            cdeck_discard.append(card1)
-            cdeck_discard.append(card2)
+            #cdeck_discard.append(card1)
+            #cdeck_discard.append(card2)
             print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])
     elif len(players)==3:
         for player in players:
@@ -23,9 +23,9 @@ def pregame_dealing():
             card2 = cdeck.pop()
             card3 = cdeck.pop()
             players[player]["cards"] = [card1,card2,card3]
-            cdeck_discard.append(card1)
-            cdeck_discard.append(card2)
-            cdeck_discard.append(card3)
+            #cdeck_discard.append(card1)
+            #cdeck_discard.append(card2)
+            #cdeck_discard.append(card3)
             print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])
     else:
         for player in players:
@@ -34,10 +34,10 @@ def pregame_dealing():
             card3 = cdeck.pop()
             card4 = cdeck.pop()
             players[player]["cards"] = [card1,card2,card3,card4]
-            cdeck_discard.append(card1)
-            cdeck_discard.append(card2)
-            cdeck_discard.append(card3)
-            cdeck_discard.append(card4)
+            #cdeck_discard.append(card1)
+            #cdeck_discard.append(card2)
+            #cdeck_discard.append(card3)
+            #cdeck_discard.append(card4)
             print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])
         
     
@@ -122,6 +122,7 @@ def menu():
     print("6 Build a Research Station")
     print("7 Travel to another research Station")
     print("8 Spend an Event Card")
+    print("9 Charter Flight (teleport)")
     print("c Display Cards")
     print("f Display Cubes")
     print("d Display Board")
@@ -131,7 +132,7 @@ def menu():
 def is_valid_action(action):
     try:
         action = int(action)
-        if action>=1 and action<=8:
+        if action>=1 and action<=9:
             return True
         else:
             return False
@@ -155,6 +156,8 @@ def resolve_action(action):
         return goto_research_station()
     elif action=="8":
         return eventcard()
+    elif action=="9":
+        return charter_flight()
     elif action=="c":
         return display_cards()
     elif action=="f":
@@ -215,6 +218,22 @@ def direct_flight():
         print("Please enter a valid number next time")
         return False
 
+def charter_flight():
+    global players
+    global cdeck_discard
+    city = players[turn]['location']
+    cards = players[turn]['cards']
+    if city in cards:
+        print("Enter the name of the city you would like to go to!(first letter in CAPS)")
+        choice = input()
+        if choice!=city:
+            players[turn]['location'] = choice
+            players[turn]['cards'].remove(city)
+            cdeck_discard.append(city)
+            return True
+        return False
+    return False
+    
 def exchange_info():
     global players
     city = players[turn]['location']
