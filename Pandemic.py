@@ -363,19 +363,16 @@ def cure():
         turn_in=[]
         for card in players[turn]['cards']:
             if card not in events and cities[card]['color']==choice:
-                turn_in.append(city)
+                turn_in.append(card)
         count=len(turn_in)
-        if (players[turn]['role']=="Scientist" and count==4) or count==5:
-            for temp in turn_in:
-                cure_helper(turn_in,choice)
+        if (players[turn]['role']=="Scientist" and count==4) or count==5:    
+            cure_helper(turn_in,choice)
             return True
         elif (players[turn]['role']=="Scientist" and count>4) or count>5:
             turn_in = which_cards(turn_in)
-            for temp in turn_in:
-                cure_helper(turn_in,choice)
+            cure_helper(turn_in,choice)
             return True
-        else:
-            return False
+        return False
     return False
 
 def which_cards(turn_in):
@@ -400,6 +397,8 @@ def cure_helper(turn_in, disease):
     global players
     global diseases
     global cdeck_discard
+    print('turn_in',turn_in)
+    print('cards',players[turn]['cards'])
     for card in turn_in:
         players[turn]['cards'].remove(card)
         cdeck_discard.append(card)
