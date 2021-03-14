@@ -504,9 +504,6 @@ def draw_two():
     elif card1=="Epidemic" or card2=="Epidemic":
         print("OH NO EPIDEMIC DDD:<")
         resolve_epidemic()
-        
-    #more than 7 cards?
-    resolve_hand_limit()
 
 def resolve_epidemic():
     #3 things that happen during an epidemic: reshuffle the infection discard pile
@@ -532,29 +529,27 @@ def resolve_hand_limit():
     global players
     global turn
     global cdeck_discard
-    while len(players[turn]["cards"])>7:
-        while True:
-            print("You have more than 7 cards!")
-            print("Please type the number of the card that you would like to remove")
-            i=0
-            for card in players[turn]["cards"]:
-                print(str(i+1), players[turn]['cards'][i])
-                i+=1
-            discard = input()
-            try:
-                discard = int(discard)
-                if discard>=1 and discard<=len(players[turn]['cards']):
-                    #remove from hand
-                    #players[turn]['cards'] = players[turn]['cards'][:discard] + players[turn]['cards'][discard+1:]
-                    removed = players[turn]['cards'][discard-1]
-                    players[turn]['cards'].remove(removed)
-                    #add to discard pile
-                    cdeck_discard.append(removed)
-                    break
-                else:
+    for player in players:
+        while len(players[player]["cards"])>7:
+            while True:
+                print("You have more than 7 cards!")
+                print("Please type the number of the card that you would like to remove")
+                i=0
+                for card in players[player]["cards"]:
+                    print(str(i+1), players[player]['cards'][i])
+                    i+=1
+                discard = input()
+                try:
+                    discard = int(discard)
+                    if discard>=1 and discard<=len(players[player]['cards']):
+                        removed = players[player]['cards'][discard-1]
+                        players[player]['cards'].remove(removed)
+                        cdeck_discard.append(removed)
+                        break
+                    else:
+                        print("Please enter a valid number")
+                except:
                     print("Please enter a valid number")
-            except:
-                print("Please enter a valid number")
 
 def infect():
     global infect_deck
@@ -941,7 +936,8 @@ while outbreaks<8 and len(cdeck)>=0 and diseases['black']['cubes']>0 and disease
             else:
                 print("Please enter a valid action")
     #draw 2 city cards
-    draw_two() #calls resolve_epidemic() and resolve_hand_limit()
+    draw_two() #calls resolve_epidemic() if there is one
+    resolve_hand_limits() #make sure ALL have less than 7
     infect()     #infect cities
 
     #next turn
