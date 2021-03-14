@@ -525,7 +525,7 @@ def resolve_double_epidemic():
     print("This test probably won't happen for a while")
     pass
 
-def resolve_hand_limit():
+def resolve_hand_limits():
     global players
     global turn
     global cdeck_discard
