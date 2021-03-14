@@ -14,8 +14,6 @@ def pregame_dealing():
             card1 = cdeck.pop()
             card2 = cdeck.pop()
             players[player]["cards"] = [card1,card2]
-            #cdeck_discard.append(card1)
-            #cdeck_discard.append(card2)
             print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])
     elif len(players)==3:
         for player in players:
@@ -23,9 +21,6 @@ def pregame_dealing():
             card2 = cdeck.pop()
             card3 = cdeck.pop()
             players[player]["cards"] = [card1,card2,card3]
-            #cdeck_discard.append(card1)
-            #cdeck_discard.append(card2)
-            #cdeck_discard.append(card3)
             print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])
     else:
         for player in players:
@@ -34,10 +29,6 @@ def pregame_dealing():
             card3 = cdeck.pop()
             card4 = cdeck.pop()
             players[player]["cards"] = [card1,card2,card3,card4]
-            #cdeck_discard.append(card1)
-            #cdeck_discard.append(card2)
-            #cdeck_discard.append(card3)
-            #cdeck_discard.append(card4)
             print(players[player]["name"]+str("'s")+" cards are:", players[player]["cards"])
         
     
