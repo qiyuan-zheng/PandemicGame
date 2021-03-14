@@ -96,7 +96,7 @@ def pregame_infect_deck_prep():
         while j<3:
             city = random.choice(ideck)
             print(city,"has been infected with",i,cities[city]["color"],"cubes!")
-            cities[city]["cubes"][cities[city]['color']] = i
+            place_cubes(city,i,cities[city]['color'])
             ideck.remove(city)
             infect_deck_discard.append(city)
             j+=1
@@ -923,7 +923,7 @@ while outbreaks<8 and len(cdeck)>=0 and diseases['black']['cubes']>0 and disease
     time.sleep(1)
     #do 4 actions
     while actions>0:
-        print("You have",actions,"actions remaining.")
+        print(players[turn]['name'],'the',players[turn]['role'],'has',actions,"actions remaining.")
         #this loop is to ensure a proper action
         while True:
             action = menu()
