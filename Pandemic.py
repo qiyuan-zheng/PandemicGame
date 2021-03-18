@@ -114,6 +114,13 @@ def menu():
     print("7 Travel to another research Station")
     print("8 Spend an Event Card")
     print("9 Charter Flight (teleport)")
+    if players[turn]['role']=="Dispatcher":
+        print("10 Move a Pawn One Space (Dispatcher)")
+        print("11 Move a Pawn to Another Pawn (Dispatcher)")
+    elif players[turn]['role']=="Operations Expert" and cities[players[turn]['location']]['research_station']:
+        print("10 Discard a Card To Travel to Any City (Operations Expert)")
+    elif players[turn]['role']=="Contingency Planner":
+        print("10 Store an Event Card from the Discard Pile (Contingency Planner)")
     print("c Display Cards")
     print("f Display Cubes")
     print("d Display Board")
@@ -123,7 +130,7 @@ def menu():
 def is_valid_action(action):
     try:
         action = int(action)
-        if action>=1 and action<=9:
+        if action>=1 and action<=11:
             return True
         else:
             return False
@@ -149,6 +156,17 @@ def resolve_action(action):
         return eventcard()
     elif action=="9":
         return charter_flight()
+    elif action=="10":
+        if players[turn]['role']=="Dispatcher":
+            return moved_via_dispatch()
+        elif players[turn]['role']=="Operations Expert":
+            return opsExpert_teleport()
+        elif players[turn]['role']=="Contingency Planner":
+            return store_card()
+        else:
+            return False
+    elif action=="11" and players[turn]['role']=="Dispatcher":
+        return pawn_to_pawn()
     elif action=="c":
         return display_cards()
     elif action=="f":
@@ -511,6 +529,7 @@ def draw_two():
     if card1=="Epidemic" and card2=="Epidemic":
         #resolve_double_epidemic()
         print("OH NO DOUBLE EPIDEMIC DDD:<")
+        resolve_double_epidemic()
     elif card1=="Epidemic" or card2=="Epidemic":
         print("OH NO EPIDEMIC DDD:<")
         resolve_epidemic()
@@ -528,8 +547,6 @@ def resolve_epidemic():
     print(infected,"has been infected with 3 cubes!")
     place_cubes(infected,3, cities[infected]['color']) #put 3 cubes on last card
     reshuffle()
-    #infect() #get rid of this line!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #why is the infect discard not going back on top?
 
 def resolve_double_epidemic():
     print("This test probably won't happen for a while")
