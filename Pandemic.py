@@ -182,17 +182,16 @@ def walk():
     for connection in connections:
         print(i,connection)
         i+=1
-    choice = input()
     try:
-        choice = int(choice)
+        choice = int(input())
         if choice>=1 and choice < i:
             players[turn]['location'] = connections[choice-1]
         else:
-            print("else")
+            #print("else")
             print("Not a valid move")
             return False
     except ValueError:
-        print("except")
+        #print("except")
         print("Not a valid move")
         return False
     return True
@@ -207,9 +206,8 @@ def direct_flight():
     for card in cards:
         print(i,card)
         i+=1
-    choice = input()
     try:
-        choice = int(choice)
+        choice = int(input())
         if choice>=1 and choice<=len(cards):
             card = players[turn]['cards'][choice-1]
             if card not in events:
@@ -466,9 +464,8 @@ def goto_research_station():
                 stations.append(othercity)
                 print(i+1,othercity)
                 i+=1
-        choice = input()
         try:
-            choice = int(choice)
+            choice = int(input())
             if choice>=1 and choice<=len(stations):
                 players[turn]['location'] = stations[i-1]
                 return True
@@ -565,9 +562,8 @@ def resolve_hand_limits():
                 for card in players[player]["cards"]:
                     print(str(i+1), players[player]['cards'][i])
                     i+=1
-                discard = input()
                 try:
-                    discard = int(discard)
+                    discard = int(input())
                     if discard>=1 and discard<=len(players[player]['cards']):
                         removed = players[player]['cards'][discard-1]
                         players[player]['cards'].remove(removed)
@@ -912,7 +908,6 @@ print()
 
 #the dealing to the players has to go here before the decks are determined
 #this will then determine the order, which is based on card population
-#this means you need to edit the cities dict to add population
 pregame_dealing()
 time.sleep(2)
 
@@ -939,7 +934,7 @@ time.sleep(2)
 
 turn = who_is_first()
 #while you have not yet lost
-while outbreaks<8 and len(cdeck)>=0 and diseases['black']['cubes']>0 and diseases['blue']['cubes']>0 and diseases['red']['cubes']>0 and diseases['yellow']['cubes']>0:
+while outbreaks<8 and len(cdeck)>=0 and diseases['black']['cubes']>=0 and diseases['blue']['cubes']>=0 and diseases['red']['cubes']>=0 and diseases['yellow']['cubes']>=0:
     actions = 4
     turn_checker()
     time.sleep(1)
