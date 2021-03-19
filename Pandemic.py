@@ -2,6 +2,7 @@ import networkx as nx
 import random
 import time
 import matplotlib as plt
+import copy
 #nick says use pygame
 
 def pregame_dealing():
@@ -171,7 +172,10 @@ def resolve_action(action):
         return display_cards()
     elif action=="f":
         return display_cubes()
-    return display_board()
+    elif action=="d":
+        return display_board()
+    else:
+        return False
 
 def walk():
     global players
@@ -481,6 +485,33 @@ def goto_research_station():
 
 def eventcard():
     return True
+
+def pawn_to_pawn():
+    global players
+    print("Which player would you like to move?")
+    for player in players:
+        print(player,"("+players[player]['name'],"the",players[player]['role'],"in",players[player]['location']+")")  
+    try:
+        choice = int(input())
+        if choice in players:
+            print("What pawn do you want to move them to?")
+            temp = copy.deepcopy(players)
+            temp.pop(choice,None)
+            for player in temp:
+                print(player,"("+players[player]['name'],"the",players[player]['role'],"in",players[player]['location']+")")
+            try:
+                choice2 = int(input())
+                if choice2 in temp:
+                    players[choice]['location'] = players[choice2]['location']
+                    return True
+                else:
+                    return False
+            except:
+                return False
+        else:
+            return False
+    except:
+        return False
 
 def display_cards():
     for player in players:
